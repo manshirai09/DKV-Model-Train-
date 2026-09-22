@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Digital KrishiVaani — AI Crop Health Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-950:#16241a;
+    --leaf-700:#1e5631;
+    --leaf-600:#2c7a43;
+    --leaf-500:#3f9457;
+    --field-100:#eef3ea;
+    --field-50:#f7faf5;
+    --paper:#ffffff;
+    --wheat-500:#c98a3c;
+    --rust-500:#b0492f;
+    --line:#dde5d7;
+    --ink-700:#33422f;
+    --ink-500:#5c6b57;
+    --radius-lg:18px;
+    --radius-md:12px;
+    --shadow:0 20px 45px -25px rgba(22,36,26,.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink-700);
+    background:var(--field-50);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces',serif;
+    letter-spacing:-0.01em;
+    color:var(--soil-950);
+  }
+  a{color:inherit;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 48px;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-mark{
+    width:42px;height:42px;border-radius:11px;
+    background:linear-gradient(155deg,var(--leaf-600),var(--soil-950));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:19px;
+    flex-shrink:0;
+  }
+  .brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:19px;color:var(--soil-950);line-height:1.2;}
+  .brand-sub{font-size:12.5px;color:var(--leaf-600);font-weight:500;}
+  .status-pill{
+    display:flex;align-items:center;gap:8px;
+    font-size:13.5px;color:var(--ink-500);font-weight:500;
+  }
+  .status-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--leaf-500);
+    box-shadow:0 0 0 4px rgba(63,148,87,.18);
+  }
+
+  /* ---------- Hero layout ---------- */
+  .hero{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:56px;
+    padding:76px 48px 96px;
+    max-width:1240px;
+    margin:0 auto;
+    align-items:start;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 14px;
+    background:var(--field-100);
+    border:1px solid var(--line);
+    border-radius:999px;
+    font-size:13px;font-weight:600;color:var(--leaf-700);
+    margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:56px;line-height:1.04;font-weight:600;margin:0 0 22px;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--leaf-600);
+  }
+  .hero p.lede{
+    font-size:17.5px;line-height:1.65;color:var(--ink-500);
+    max-width:480px;margin:0 0 38px;
+  }
+  .hero p.lede b{color:var(--soil-950);font-weight:600;}
+
+  .feature-list{display:flex;flex-direction:column;gap:18px;}
+  .feature-row{display:flex;align-items:flex-start;gap:14px;}
+  .feature-icon{
+    width:38px;height:38px;border-radius:10px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;background:var(--paper);border:1px solid var(--line);
+  }
+  .feature-row h3{font-size:15px;margin:0 0 2px;font-family:'Inter',sans-serif;font-weight:600;color:var(--soil-950);}
+  .feature-row p{font-size:13.5px;margin:0;color:var(--ink-500);}
+
+  /* ---------- Scanner card ---------- */
+  .scanner{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:32px;
+  }
+  .scanner-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+  .scanner-head .tag{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--wheat-500);text-transform:uppercase;margin-bottom:6px;}
+  .scanner-head h2{font-size:24px;margin:0;font-weight:600;}
+  .scanner-badge{
+    width:44px;height:44px;border-radius:12px;background:var(--field-100);
+    display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;
+  }
+
+  .dropzone{
+    border:1.5px dashed #c3d2bc;
+    border-radius:var(--radius-md);
+    padding:34px 20px;
+    text-align:center;
+    background:var(--field-50);
+    cursor:pointer;
+    transition:border-color .18s ease, background .18s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--leaf-500);
+    background:var(--field-100);
+  }
+  .dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .dz-icon{font-size:30px;margin-bottom:12px;}
+  .dropzone h3{font-family:'Inter',sans-serif;font-size:16px;font-weight:600;margin:0 0 4px;color:var(--soil-950);}
+  .dropzone p{font-size:13px;color:var(--ink-500);margin:0 0 16px;}
+  .choose-btn{
+    display:inline-block;
+    background:var(--soil-950);color:#fff;
+    padding:10px 22px;border-radius:999px;
+    font-size:14px;font-weight:600;
+    border:none;
+  }
+  .hint{font-size:12px;color:#93a08e;margin-top:14px;}
+
+  .preview-wrap{display:none;}
+  .preview-wrap.active{display:block;}
+  .preview-img{
+    width:100%;max-height:230px;object-fit:cover;
+    border-radius:var(--radius-md);border:1px solid var(--line);
+    display:block;
+  }
+  .preview-meta{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:10px;font-size:13px;color:var(--ink-500);
+  }
+  .preview-meta button{
+    background:none;border:none;color:var(--rust-500);
+    font-size:13px;font-weight:600;cursor:pointer;padding:0;
+  }
+
+  .analyze-btn{
+    width:100%;margin-top:20px;
+    background:var(--leaf-700);color:#fff;
+    border:none;border-radius:var(--radius-md);
+    padding:15px 20px;font-size:15.5px;font-weight:600;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:background .15s ease, transform .1s ease;
+    font-family:'Inter',sans-serif;
+  }
+  .analyze-btn:hover:not(:disabled){background:var(--leaf-600);}
+  .analyze-btn:active:not(:disabled){transform:scale(.99);}
+  .analyze-btn:disabled{background:#a9b8a3;cursor:not-allowed;}
+
+  .spinner{
+    width:16px;height:16px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;
+    animation:spin .7s linear infinite;
+    display:none;
+  }
+  .analyze-btn.loading .spinner{display:inline-block;}
+  .analyze-btn.loading .btn-label::after{content:"Analyzing…";}
+  .analyze-btn.loading .btn-label{font-size:0;}
+  .analyze-btn.loading .btn-label::after{font-size:15.5px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .footnote{
+    text-align:center;font-size:12px;color:#93a08e;margin-top:14px;
+  }
+
+  /* ---------- Result panel ---------- */
+  .result{
+    display:none;
+    margin-top:22px;
+    border-radius:var(--radius-md);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .result.active{display:block;animation:reveal .35s ease;}
+  @keyframes reveal{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .result-top{
+    padding:18px 20px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+  }
+  .result-top.healthy{background:#eaf6ec;}
+  .result-top.disease{background:#fbeee9;}
+  .result-plant{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-500);margin-bottom:4px;}
+  .result-disease{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--soil-950);}
+  .result-status{
+    font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;
+    white-space:nowrap;
+  }
+  .result-status.healthy{background:var(--leaf-600);color:#fff;}
+  .result-status.disease{background:var(--rust-500);color:#fff;}
+  .result-bottom{
+    padding:14px 20px;background:var(--paper);
+    font-size:13px;color:var(--ink-500);
+    display:flex;justify-content:space-between;
+  }
+
+  .error-box{
+    display:none;
+    margin-top:18px;padding:14px 16px;
+    background:#fbeee9;border:1px solid #f0cdc0;border-radius:var(--radius-md);
+    font-size:13.5px;color:var(--rust-500);
+  }
+  .error-box.active{display:block;}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;padding:48px 24px 64px;}
+    .hero h1{font-size:38px;}
+    .topbar{padding:16px 24px;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">D</div>
+      <div>
+        <div class="brand-name">Digital KrishiVaani</div>
+        <div class="brand-sub">AI-Powered Crop Health</div>
+      </div>
+    </div>
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      <span id="statusText">AI System Online</span>
+    </div>
+  </header
+
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">🌿 AI-Powered Agriculture</span>
+      <h1>Protect Your Crops<br><em>With AI</em></h1>
+      <p class="lede">
+        Upload a photo of your crop leaf and let <b>Digital KrishiVaani</b>
+        identify possible diseases and point you toward the right care.
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-row">
+          <div class="feature-icon">🔍</div>
+          <div>
+            <h3>AI Detection</h3>
+            <p>Trained on 38 crop &amp; disease classes</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon">🌱</div>
+          <div>
+            <h3>Farmer Friendly</h3>
+            <p>Plain-language plant and disease names</p>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon">⚡</div>
+          <div>
+            <h3>Quick Analysis</h3>
+            <p>Results straight from your local model</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scanner">
+      <div class="scanner-head">
+        <div>
+          <div class="tag">Crop Health Scanner</div>
+          <h2>Scan Your Crop</h2>
+        </div>
+        <div class="scanner-badge">📷</div>
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg" />
+        <div class="dz-icon">📷</div>
+        <h3>Upload Crop Image</h3>
+        <p>Take a clear photo of the affected leaf</p>
+        <span class="choose-btn">Choose Image</span>
+      </div>
+
+      <div class="preview-wrap" id="previewWrap">
+        <img id="previewImg" class="preview-img" alt="Selected crop leaf" />
+        <div class="preview-meta">
+          <span id="fileName"></span>
+          <button id="removeFile" type="button">Remove</button>
+        </div>
+      </div>
+
+      <p class="hint" id="dzHint">JPG, JPEG or PNG</p>
+
+      <button class="analyze-btn" id="analyzeBtn" disabled>
+        <span class="spinner"></span>
+        <span class="btn-label">🌿 Analyze Crop with AI</span>
+      </button>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <div class="result" id="result">
+        <div class="result-top" id="resultTop">
+          <div>
+            <div class="result-plant" id="resultPlant">Plant</div>
+            <div class="result-disease" id="resultDisease">Disease</div>
+          </div>
+          <span class="result-status" id="resultStatus">Status</span>
+        </div>
+        <div class="result-bottom">
+          <span>Class index</span>
+          <span id="resultIndex">—</span>
+        </div>
+      </div>
+
+      <p class="footnote">🔒 Your crop image is used only for analysis</p>
+    </div>
+  </section>
+
+<script>
+  const API_URL = "http://127.0.0.1:8000/predict";
+  const HEALTH_URL = "http://127.0.0.1:8000/";
+
+  const dropzone   = document.getElementById('dropzone');
+  const fileInput  = document.getElementById('fileInput');
+  const previewWrap= document.getElementById('previewWrap');
+  const previewImg = document.getElementById('previewImg');
+  const fileName   = document.getElementById('fileName');
+  const removeBtn  = document.getElementById('removeFile');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const errorBox   = document.getElementById('errorBox');
+  const resultBox  = document.getElementById('result');
+  const resultTop  = document.getElementById('resultTop');
+  const resultPlant= document.getElementById('resultPlant');
+  const resultDisease = document.getElementById('resultDisease');
+  const resultStatus  = document.getElementById('resultStatus');
+  const resultIndex   = document.getElementById('resultIndex');
+  const statusText    = document.getElementById('statusText');
+  const statusDot     = document.querySelector('.status-dot');
+
+  let selectedFile = null;
+
+  function resetResult(){
+    resultBox.classList.remove('active');
+    errorBox.classList.remove('active');
+    errorBox.textContent = '';
+  }
+
+  function showFile(file){
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = e => { previewImg.src = e.target.result; };
+    reader.readAsDataURL(file);
+    fileName.textContent = file.name;
+    dropzone.style.display = 'none';
+    previewWrap.classList.add('active');
+    document.getElementById('dzHint').style.display = 'none';
+    analyzeBtn.disabled = false;
+    resetResult();
+  }
+
+  fileInput.addEventListener('change', e => {
+    if (e.target.files && e.target.files[0]) showFile(e.target.files[0]);
+  });
+
+  ['dragenter','dragover'].forEach(evt =>
+    dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); })
+  );
+  ['dragleave','drop'].forEach(evt =>
+    dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag'); })
+  );
+  dropzone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) showFile(file);
+  });
+
+  removeBtn.addEventListener('click', () => {
+    selectedFile = null;
+    fileInput.value = '';
+    previewWrap.classList.remove('active');
+    dropzone.style.display = 'block';
+    document.getElementById('dzHint').style.display = 'block';
+    analyzeBtn.disabled = true;
+    resetResult();
+  });
+
+  function formatName(raw){
+    // "Apple___Cedar_apple_rust" -> { plant: "Apple", disease: "Cedar apple rust" }
+    let [plant, disease] = raw.includes('___') ? raw.split('___') : [raw, ''];
+    plant = plant.replace(/_/g, ' ').trim();
+    disease = disease.replace(/_/g, ' ').replace(/\(|\)/g, m => m).trim();
+    const isHealthy = disease.toLowerCase() === 'healthy' || disease === '';
+    return { plant, disease: isHealthy ? 'No disease detected' : disease, isHealthy };
+  }
+
+  analyzeBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    resetResult();
+    analyzeBtn.classList.add('loading');
+    analyzeBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const res = await fetch(API_URL, { method: 'POST', body: formData });
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const data = await res.json();
+
+      const rawLabel = data.prediction ?? data.disease ?? '';
+      const { plant, disease, isHealthy } = formatName(rawLabel);
+
+      resultPlant.textContent = plant || '—';
+      resultDisease.textContent = disease || rawLabel || 'Unknown';
+      resultIndex.textContent = data.class_index ?? '—';
+
+      resultTop.className = 'result-top ' + (isHealthy ? 'healthy' : 'disease');
+      resultStatus.className = 'result-status ' + (isHealthy ? 'healthy' : 'disease');
+      resultStatus.textContent = isHealthy ? 'Healthy' : 'Disease detected';
+
+      resultBox.classList.add('active');
+    } catch (err) {
+      errorBox.textContent = 'Could not reach the analysis server. Make sure the backend is running on port 8000. (' + err.message + ')';
+      errorBox.classList.add('active');
+    } finally {
+      analyzeBtn.classList.remove('loading');
+      analyzeBtn.disabled = false;
+    }
+  });
+
+  // Quick backend health check on load
+  fetch(HEALTH_URL).then(r => {
+    if (!r.ok) throw new Error();
+    statusText.textContent = 'AI System Online';
+    statusDot.style.background = '#3f9457';
+  }).catch(() => {
+    statusText.textContent = 'Backend Offline';
+    statusDot.style.background = '#b0492f';
+    statusDot.style.boxShadow = '0 0 0 4px rgba(176,73,47,.18)';
+  });
+</script>
+</body>
+</html>
